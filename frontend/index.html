@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QuickServe - Fast &amp; Smart Online Shopping</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Cinzel:wght@500;600&display=swap">
+  <link rel="stylesheet" href="css/style.css?v=20261027g">
+</head>
+<body id="top">
+
+  <div class="glow g1"></div><div class="glow g2"></div>
+  <div class="bg-podium" aria-hidden="true"><i class="b1"></i><i class="b2"></i><i class="b3"></i><i class="b4"></i></div>
+
+  <div class="announce">💳 10% instant discount on HDFC Bank Cards &nbsp;|&nbsp; No Cost EMI on orders above ₹10,000 &nbsp;|&nbsp; Free delivery above ₹499</div>
+
+  <div class="page">
+    <!-- Header -->
+    <header class="navbar">
+      <a href="#top" class="logo"><i class="bars"><b></b><b></b><b></b></i>QUICKSERVE</a>
+      <span class="api-badge" id="apiStatus" title="Backend API status">● Connecting...</span>
+
+      <nav class="menu">
+        <a href="#top">Home</a>
+        <a href="#products">Products</a>
+        <a href="#categories">Categories</a>
+        <a href="#" id="navTrackBtn">Track Order 📦</a>
+        <a href="#why">Why Us</a>
+      </nav>
+
+      <form class="search" id="searchForm">
+        <input type="text" id="searchInput" placeholder="Search products...">
+        <select id="searchCategory" aria-label="Category"></select>
+        <button type="submit" aria-label="Search">🔍</button>
+      </form>
+
+      <div class="nav-actions">
+        <button class="icon-btn" id="themeToggle" title="Toggle theme">🌙</button>
+        <button class="icon-btn" id="wishlistBtn" title="Wishlist">♡<span class="badge" id="wishCount">0</span></button>
+        <button class="icon-btn" id="cartBtn" title="Cart">🛒<span class="badge" id="cartCount">0</span></button>
+        <a href="#products" class="btn-grad">Shop Now</a>
+      </div>
+    </header>
+
+    <!-- Hero -->
+    <section class="hero" id="hero">
+      <div class="hero-giant" id="hGiant" aria-hidden="true"></div>
+      <div class="hero-text" id="heroText">
+        <div class="h-arrows">
+          <button class="h-arrow" id="hPrev" aria-label="Previous">‹</button>
+          <button class="h-arrow" id="hNext" aria-label="Next">›</button>
+          <div class="h-kicker"><span id="hKicker"></span><em>Ends in <b id="hTimer">--:--:--</b></em></div>
+        </div>
+        <h1><span id="hLine1"></span><br><span id="hHl"></span></h1>
+        <p id="hText"></p>
+        <div class="h-chips" id="hChips"></div>
+        <div class="hero-cta">
+          <button class="btn-white" id="hShop">Buy Now ›</button>
+          <button class="btn-ghost big" id="hDeals">More Deals</button>
+        </div>
+        <div class="h-dots" id="hDots"></div>
+      </div>
+
+      <div class="hero-art" id="heroArt">
+        <div class="hero-panel"></div>
+        <div class="hero-podium"><i></i><i></i></div>
+        <img class="sat s1" id="sat1" alt="">
+        <img class="sat s2" id="sat2" alt="">
+        <img class="sat s3" id="sat3" alt="">
+        <div class="photo-frame" id="photoFrame">
+          <canvas id="hCanvas" aria-label="Product - drag or tap to spin" hidden></canvas><img id="hPhoto" alt=""></div>
+        <span class="spin-hint">↻ Touch &amp; drag to spin 360°</span>
+        <p class="hero-tagline" id="hTag"></p>
+      </div>
+
+      <div class="hero-right" id="heroRight">
+        <div class="h-price"><b id="hPrice"></b><s id="hMrp"></s></div>
+        <span class="h-off" id="hOff"></span>
+        <p class="opt-label">Choose your option</p>
+        <div class="h-options" id="hOptions"></div>
+        <button class="next-card" id="hNextCard" aria-label="Next product"><span id="hNextIcon"></span><small id="hNextName"></small></button>
+      </div>
+    </section>
+
+    <!-- Feature strip -->
+    <section class="features glass">
+      <div><span>🚚</span><p>Free Delivery<br>above ₹499</p></div>
+      <div><span>↩️</span><p>7 Days Replacement<br>Policy</p></div>
+      <div><span>💵</span><p>Cash on Delivery<br>Available</p></div>
+      <div><span>🧾</span><p>GST Invoice &amp;<br>Brand Warranty</p></div>
+    </section>
+
+    <!-- Featured -->
+    <section class="block">
+      <div class="block-head">
+        <h2>Featured Products</h2>
+        <a href="#products" class="btn-ghost small">View All Products →</a>
+      </div>
+      <div class="featured" id="featured"></div>
+    </section>
+
+    <!-- Categories -->
+    <section class="block" id="categories">
+      <div class="block-head"><h2>Shop By Category</h2></div>
+      <div class="cat-grid" id="catCards"></div>
+    </section>
+
+    <!-- All products -->
+    <section class="block" id="products">
+      <div class="block-head">
+        <h2 id="resultTitle">All Products</h2>
+        <span class="count" id="resultCount"></span>
+      </div>
+
+      <div class="category-strip" id="categoryStrip"></div>
+
+      <div class="filters glass">
+        <label>Sort by
+          <select id="sortSelect">
+            <option value="featured">Popularity</option>
+            <option value="low">Price: Low to High</option>
+            <option value="high">Price: High to Low</option>
+            <option value="rating">Top Rated</option>
+            <option value="discount">Discount</option>
+          </select>
+        </label>
+        <label class="grow">Max price: <b id="priceLabel">₹100000</b>
+          <input type="range" id="priceRange" min="0" max="100000" step="500" value="100000">
+        </label>
+        <label>Minimum rating
+          <select id="ratingSelect">
+            <option value="0">All</option>
+            <option value="4">4★ &amp; up</option>
+            <option value="3">3★ &amp; up</option>
+          </select>
+        </label>
+        <button class="btn-ghost small" id="resetFilters">Clear all</button>
+      </div>
+
+      <div class="product-grid" id="productGrid"></div>
+    </section>
+
+    <!-- Why shop -->
+    <section class="why" id="why">
+      <h2>Why Shop With QuickServe?</h2>
+      <div class="why-grid">
+        <div><span class="why-ico">🚚</span><div><b>Free Delivery</b><p>Free shipping on orders above ₹499. Delivery in 3-5 business days.</p></div></div>
+        <div><span class="why-ico">📦</span><div><b>7 Days Replacement</b><p>Damaged, defective or wrong item? Get a hassle-free replacement.</p></div></div>
+        <div><span class="why-ico">🛡️</span><div><b>Genuine Products</b><p>Sold by brand-authorised sellers with manufacturer warranty.</p></div></div>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <div class="f-grid">
+        <div><h5>About</h5><a>Contact Us</a><a>About Us</a><a>Careers</a><a>Press</a></div>
+        <div><h5>Help</h5><a>Payments</a><a>Shipping</a><a>Cancellation &amp; Returns</a><a>FAQ</a></div>
+        <div><h5>Policy</h5><a>Return Policy</a><a>Terms of Use</a><a>Security</a><a>Privacy</a></div>
+        <div><h5>Registered Office</h5><p>QuickServe Retail Pvt. Ltd.<br>College Road, Sector 12<br>India - 110001<br>support@quickserve.example</p></div>
+      </div>
+      <div class="f-pay">💳 Visa &nbsp;·&nbsp; Mastercard &nbsp;·&nbsp; RuPay &nbsp;·&nbsp; UPI &nbsp;·&nbsp; Net Banking &nbsp;·&nbsp; Cash on Delivery</div>
+      <div class="f-copy">© 2026 QuickServe – Production-Ready E-commerce. Built with Node.js, Express &amp; Vanilla JS.</div>
+      <div class="f-copy">Product photos: Unsplash photographers (free licence). Book covers: Open Library.</div>
+    </footer>
+  </div>
+
+  <!-- Cart drawer -->
+  <div class="overlay" id="overlay"></div>
+  <aside class="drawer" id="cartDrawer">
+    <div class="drawer-head"><h3>Your Cart</h3><button class="close" data-close>✕</button></div>
+    <div class="drawer-body" id="cartItems"></div>
+    <div class="drawer-foot">
+      <div class="row"><span>Subtotal</span><span id="cartSubtotal">₹0</span></div>
+      <div class="row"><span>Delivery</span><span id="cartDelivery">₹0</span></div>
+      <div class="row total"><span>Total</span><span id="cartTotal">₹0</span></div>
+      <button class="btn-grad full" id="checkoutBtn">Proceed to Checkout</button>
+    </div>
+  </aside>
+
+  <aside class="drawer" id="wishDrawer">
+    <div class="drawer-head"><h3>Wishlist</h3><button class="close" data-close>✕</button></div>
+    <div class="drawer-body" id="wishItems"></div>
+  </aside>
+  <div class="toast" id="toast"></div>
+
+  <!-- Checkout Modal -->
+  <div class="modal" id="checkoutModal">
+    <div class="modal-box glass">
+      <div class="modal-head">
+        <h3>QuickServe Secure Checkout</h3>
+        <button class="close" id="closeCheckout">✕</button>
+      </div>
+      <form id="checkoutForm" class="checkout-form">
+        <div class="form-grid">
+          <label>
+            <span>Full Name *</span>
+            <input type="text" id="custName" placeholder="e.g. Rahul Sharma" required>
+          </label>
+          <label>
+            <span>Email Address *</span>
+            <input type="email" id="custEmail" placeholder="rahul@example.com" required>
+          </label>
+          <label>
+            <span>Phone Number *</span>
+            <input type="tel" id="custPhone" placeholder="+91 98765 43210" required>
+          </label>
+          <label>
+            <span>Payment Method *</span>
+            <select id="custPayment">
+              <option value="cod">Cash on Delivery (COD)</option>
+              <option value="upi">UPI / QR Code</option>
+              <option value="card">Credit / Debit Card</option>
+              <option value="netbanking">Net Banking</option>
+            </select>
+          </label>
+          <label class="full">
+            <span>Complete Shipping Address *</span>
+            <textarea id="custAddress" rows="3" placeholder="House/Flat No., Street, Landmark, City, State, PIN Code" required></textarea>
+          </label>
+        </div>
+
+        <div class="checkout-summary">
+          <div class="summary-line"><span>Total Items (<span id="chkCount">0</span>)</span><span id="chkSubtotal">₹0</span></div>
+          <div class="summary-line"><span>Delivery Fee</span><span id="chkDelivery">FREE</span></div>
+          <div class="summary-line total"><span>Total Payable</span><span id="chkTotal">₹0</span></div>
+        </div>
+
+        <button type="submit" class="btn-grad full big" id="placeOrderBtn">Confirm &amp; Place Order 🔒</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Order Success Modal -->
+  <div class="modal" id="orderSuccessModal">
+    <div class="modal-box glass text-center">
+      <div class="success-icon">🎉</div>
+      <h3 id="succTitle">Order Confirmed!</h3>
+      <p class="succ-sub">Thank you for shopping with QuickServe. Your order is placed.</p>
+      <div class="order-receipt glass" id="orderReceipt"></div>
+      <button class="btn-grad" id="succDoneBtn">Continue Shopping</button>
+    </div>
+  </div>
+
+  <!-- Interactive Quick View Glass Modal -->
+  <div class="modal" id="quickViewModal">
+    <div class="modal-box glass qview-box">
+      <button class="close qview-close" id="closeQView">✕</button>
+      <div class="qview-grid">
+        <div class="qview-media" id="qvMedia">
+          <img id="qvImg" src="" alt="Product">
+        </div>
+        <div class="qview-details">
+          <div class="cat" id="qvBrand">Brand</div>
+          <h3 id="qvTitle">Product Title</h3>
+          <div class="rating" id="qvRating"><span class="rpill" id="qvRatingPill">4.3 ★</span> <small id="qvReviews">(1,234 reviews)</small></div>
+          <div class="price" id="qvPriceBlock">
+            <b id="qvPrice">₹0</b>
+            <s id="qvMrp">₹0</s>
+            <span class="off" id="qvOff">0% off</span>
+          </div>
+          <div class="offer" id="qvOffer"></div>
+          <ul class="specs" id="qvSpecs"></ul>
+
+          <div class="pincode-box glass">
+            <span>📍 <b>Check Delivery Speed:</b></span>
+            <div class="pin-input-group">
+              <input type="text" id="pinInput" placeholder="Enter PIN code (e.g. 560001)" maxlength="6">
+              <button type="button" id="checkPinBtn">Check</button>
+            </div>
+            <p class="pin-result" id="pinResult">Enter 6-digit PIN code for express shipping &amp; COD availability.</p>
+          </div>
+
+          <div style="display:flex; justify-content:space-between; align-items:center; margin:14px 0 8px;">
+            <a id="qvFullPageLink" href="product.html?id=1" class="btn-ghost small" style="text-decoration:none; display:inline-flex; align-items:center; gap:6px;">Full Product Details ↗</a>
+            <span style="font-size:0.78rem; color:#10b981; font-weight:600;">⚡ In Stock · Express Dispatch</span>
+          </div>
+
+          <div class="qview-actions">
+            <div class="qty-stepper">
+              <button type="button" id="qvQtyMinus">−</button>
+              <span id="qvQty">1</span>
+              <button type="button" id="qvQtyPlus">+</button>
+            </div>
+            <button type="button" class="btn-primary grow" id="qvAddCart">Add to Cart 🛒</button>
+            <button type="button" class="btn-grad" id="qvBuyNow">Buy Now ›</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Order Tracking Glass Modal -->
+  <div class="modal" id="trackOrderModal">
+    <div class="modal-box glass">
+      <div class="modal-head">
+        <h3>Track Your Order 📦</h3>
+        <button class="close" id="closeTrack">✕</button>
+      </div>
+      <div class="track-form">
+        <p style="color:var(--muted); font-size:0.88rem; margin-bottom:12px;">
+          Enter your QuickServe Order ID (e.g. <b>QS-20261027-3625</b>) to view live progress:
+        </p>
+        <div class="track-input-group">
+          <input type="text" id="trackOrderIdInput" placeholder="Enter Order ID">
+          <button type="button" class="btn-grad" id="btnLookupOrder">Track</button>
+        </div>
+      </div>
+      <div class="track-timeline" id="trackTimeline" style="display:none;"></div>
+    </div>
+  </div>
+
+  <!-- Floating Glass Quick-Dock -->
+  <nav class="glass-dock" id="glassDock" aria-label="Quick Actions">
+    <a href="#top" class="dock-btn" title="Back to Top"><span>🏠</span><small>Home</small></a>
+    <button type="button" class="dock-btn" id="dockSearch" title="Search catalog"><span>🔍</span><small>Search</small></button>
+    <button type="button" class="dock-btn" id="dockDeals" title="Explore Top Deals"><span>⚡</span><small>Deals</small></button>
+    <button type="button" class="dock-btn" id="dockTrack" title="Track an Order"><span>📦</span><small>Track</small></button>
+    <button type="button" class="dock-btn dock-cart" id="dockCart" title="View Cart">
+      <span>🛒</span><span class="dock-badge" id="dockCartCount">0</span><small id="dockCartTotal">₹0</small>
+    </button>
+    <a href="#top" class="dock-btn" title="Scroll to Top"><span>▲</span><small>Top</small></a>
+  </nav>
+
+  <!-- Live Social Proof Toast -->
+  <aside class="live-toast glass" id="liveSocialToast" aria-live="polite">
+    <span class="live-pulse"></span>
+    <div class="live-content">
+      <b id="liveToastTitle">⚡ Live Activity</b>
+      <p id="liveToastMsg">Someone in Mumbai just purchased boAt Rockerz 450</p>
+    </div>
+    <button type="button" class="live-close" id="closeLiveToast" aria-label="Close notification">✕</button>
+  </aside>
+
+  <script src="js/api.js?v=20261028"></script>
+  <script src="js/data.js?v=20261028"></script>
+  <script src="js/store.js?v=20261028"></script>
+  <script src="js/app.js?v=20261028"></script>
+  <script src="vendor/three.min.js?v=20261028"></script>
+  <script src="vendor/GLTFLoader.js?v=20261028"></script>
+  <script src="js/herospin.js?v=20261028"></script>
+  <script src="js/home.js?v=20261028"></script>
+</body>
+</html>

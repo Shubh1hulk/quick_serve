@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QuickServe - Product Details</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Cinzel:wght@500;600&display=swap">
+  <link rel="stylesheet" href="css/style.css?v=20261028b">
+  <style>
+    .pdp-page { max-width: 1280px; margin: 0 auto; padding: 16px; }
+    .breadcrumbs { display: flex; align-items: center; gap: 8px; margin: 18px 0; font-size: 0.88rem; color: var(--muted); }
+    .breadcrumbs a { text-decoration: none; color: var(--text); opacity: 0.8; }
+    .breadcrumbs a:hover { color: var(--blue); opacity: 1; }
+    .pdp-grid { display: grid; grid-template-columns: 1fr 1.2fr; gap: 36px; margin-bottom: 48px; }
+    .pdp-media-card {
+      position: sticky; top: 90px;
+      padding: 32px; border-radius: var(--radius);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      background: var(--glass); border: 1px solid var(--border); box-shadow: var(--shadow);
+      min-height: 440px;
+    }
+    .pdp-img-wrap {
+      width: 100%; height: 360px; display: grid; place-items: center;
+      background: radial-gradient(circle at center, rgba(120, 150, 255, .15), transparent 70%);
+      border-radius: 16px; overflow: hidden;
+    }
+    .pdp-img-wrap img {
+      max-width: 90%; max-height: 320px; object-fit: contain;
+      filter: drop-shadow(0 20px 30px rgba(0, 0, 0, .45));
+      transition: transform .3s ease;
+    }
+    .pdp-img-wrap img:hover { transform: scale(1.08); }
+    .pdp-details { display: flex; flex-direction: column; gap: 14px; }
+    .pdp-brand-tag { font-size: 0.85rem; font-weight: 700; color: var(--blue); letter-spacing: 1px; text-transform: uppercase; }
+    .pdp-title { font-size: clamp(1.5rem, 2.8vw, 2.2rem); font-weight: 800; line-height: 1.2; color: var(--text); }
+    .pdp-rating-row { display: flex; align-items: center; gap: 12px; font-size: 0.9rem; }
+    .pdp-price-box {
+      display: flex; align-items: baseline; gap: 12px; margin: 8px 0;
+      padding: 16px 20px; border-radius: 14px;
+      background: var(--glass); border: 1px solid var(--border);
+    }
+    .pdp-price-box b { font-size: 2rem; color: var(--blue); font-weight: 800; }
+    .pdp-price-box s { font-size: 1.1rem; color: var(--muted); }
+    .pdp-offers-card {
+      padding: 16px; border-radius: 14px;
+      background: var(--glass); border: 1px solid var(--border); font-size: 0.88rem; line-height: 1.6;
+    }
+    .pdp-offers-card h5 { margin-bottom: 6px; color: var(--text); font-size: 0.95rem; }
+    .pdp-actions-row { display: flex; gap: 14px; align-items: center; margin: 12px 0; }
+    .pdp-specs-table {
+      width: 100%; border-collapse: collapse; margin-top: 14px; font-size: 0.9rem;
+    }
+    .pdp-specs-table tr { border-bottom: 1px solid var(--border); }
+    .pdp-specs-table td { padding: 10px 12px; color: var(--text); }
+    .pdp-specs-table td:first-child { width: 35%; color: var(--muted); font-weight: 500; }
+    .reviews-card {
+      padding: 28px; border-radius: var(--radius);
+      background: var(--glass); border: 1px solid var(--border); box-shadow: var(--shadow); margin-bottom: 48px;
+    }
+    .review-item { padding: 14px 0; border-bottom: 1px solid var(--border); }
+    .review-item:last-child { border-bottom: none; }
+    .review-user { font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 8px; }
+    .review-user span { font-size: 0.75rem; color: #10b981; }
+    @media (max-width: 900px) {
+      .pdp-grid { grid-template-columns: 1fr; }
+      .pdp-media-card { position: static; min-height: auto; }
+    }
+  </style>
+</head>
+<body id="top">
+
+  <div class="glow g1"></div><div class="glow g2"></div>
+  <div class="bg-podium" aria-hidden="true"><i class="b1"></i><i class="b2"></i><i class="b3"></i><i class="b4"></i></div>
+
+  <div class="announce">💳 10% instant discount on HDFC Bank Cards &nbsp;|&nbsp; Free delivery above ₹499 &nbsp;|&nbsp; 7 Days Replacement</div>
+
+  <div class="pdp-page">
+    <!-- Header -->
+    <header class="navbar">
+      <a href="index.html" class="logo"><i class="bars"><b></b><b></b><b></b></i>QUICKSERVE</a>
+      <span class="api-badge" id="apiStatus" title="Backend API status">● Connecting...</span>
+
+      <nav class="menu">
+        <a href="index.html">Home</a>
+        <a href="index.html#products">Products</a>
+        <a href="index.html#categories">Categories</a>
+        <a href="#" id="navTrackBtn">Track Order 📦</a>
+        <a href="index.html#why">Why Us</a>
+      </nav>
+
+      <form class="search" id="searchForm" action="index.html#products">
+        <input type="text" id="searchInput" placeholder="Search products...">
+        <select id="searchCategory" aria-label="Category"></select>
+        <button type="submit" aria-label="Search">🔍</button>
+      </form>
+
+      <div class="nav-actions">
+        <button class="icon-btn" id="themeToggle" title="Toggle theme">🌙</button>
+        <button class="icon-btn" id="wishlistBtn" title="Wishlist">♡<span class="badge" id="wishCount">0</span></button>
+        <button class="icon-btn" id="cartBtn" title="Cart">🛒<span class="badge" id="cartCount">0</span></button>
+        <a href="index.html#products" class="btn-grad">Shop Catalog</a>
+      </div>
+    </header>
+
+    <!-- Breadcrumbs -->
+    <nav class="breadcrumbs" aria-label="Breadcrumb">
+      <a href="index.html">Home</a> <span>›</span>
+      <a href="index.html#products" id="bcCategory">Category</a> <span>›</span>
+      <span id="bcProduct">Product Details</span>
+    </nav>
+
+    <!-- Product Showcase -->
+    <main class="pdp-grid">
+      <!-- Media Spotlight -->
+      <section class="pdp-media-card">
+        <div class="pdp-img-wrap">
+          <img id="pdpMainImg" src="" alt="Product Showcase">
+        </div>
+        <div style="display:flex; gap:10px; margin-top:20px;">
+          <span class="assured" id="pdpAssured">✔ QuickServe Assured</span>
+          <span class="h-off" id="pdpOffBadge">0% OFF</span>
+        </div>
+      </section>
+
+      <!-- Details & Actions -->
+      <section class="pdp-details">
+        <div class="pdp-brand-tag" id="pdpBrand">Brand Name</div>
+        <h1 class="pdp-title" id="pdpTitle">Loading product details...</h1>
+
+        <div class="pdp-rating-row">
+          <span class="rpill" id="pdpRating">4.4 ★</span>
+          <span style="color:var(--muted);" id="pdpReviewsCount">(2,400+ Verified Ratings)</span>
+          <span>·</span>
+          <span style="color:#10b981; font-weight:600;">In Stock</span>
+        </div>
+
+        <div class="pdp-price-box">
+          <b id="pdpPrice">₹0</b>
+          <s id="pdpMrp">₹0</s>
+          <span class="off" id="pdpDiscountPct">0% off</span>
+        </div>
+
+        <div class="pdp-offers-card">
+          <h5>Available Bank &amp; Marketplace Offers</h5>
+          <p>🎁 <b>Bank Offer:</b> 10% Instant Discount on HDFC &amp; Axis Bank Credit/Debit Cards</p>
+          <p>⚡ <b>Special Price:</b> Extra savings included in listed price</p>
+          <p>💳 <b>No Cost EMI:</b> Available on orders above ₹10,000</p>
+        </div>
+
+        <!-- PIN Checker -->
+        <div class="pincode-box glass">
+          <span>📍 <b>Check Estimated Delivery to Your Location:</b></span>
+          <div class="pin-input-group">
+            <input type="text" id="pinInput" placeholder="Enter PIN code (e.g. 110001)" maxlength="6">
+            <button type="button" id="checkPinBtn">Check Speed</button>
+          </div>
+          <p class="pin-result" id="pinResult">Enter your 6-digit postal PIN code for delivery options &amp; COD check.</p>
+        </div>
+
+        <!-- Actions -->
+        <div class="pdp-actions-row">
+          <div class="qty-stepper">
+            <button type="button" id="pdpQtyMinus">−</button>
+            <span id="pdpQty">1</span>
+            <button type="button" id="pdpQtyPlus">+</button>
+          </div>
+          <button type="button" class="btn-primary grow" id="pdpAddCartBtn" style="padding:14px 22px; font-size:1rem;">Add to Cart 🛒</button>
+          <button type="button" class="btn-grad" id="pdpBuyNowBtn" style="padding:14px 26px; font-size:1rem;">Buy Now ›</button>
+          <button type="button" class="wish" id="pdpWishBtn" style="position:static; width:44px; height:44px; font-size:1.3rem;">♡</button>
+        </div>
+
+        <!-- Trust Badges -->
+        <div class="features glass" style="margin-top:16px;">
+          <div><span>🚚</span><p>Free Delivery<br>above ₹499</p></div>
+          <div><span>↩️</span><p>7 Days Easy<br>Replacement</p></div>
+          <div><span>🛡️</span><p>1-Year Genuine<br>Brand Warranty</p></div>
+          <div><span>💵</span><p>Cash on Delivery<br>Supported</p></div>
+        </div>
+
+        <!-- Specifications -->
+        <div style="margin-top:24px;">
+          <h3 style="font-size:1.25rem; font-weight:700; margin-bottom:12px; color:var(--text);">Product Specifications</h3>
+          <table class="pdp-specs-table glass" id="pdpSpecsTable"></table>
+        </div>
+      </section>
+    </main>
+
+    <!-- Customer Reviews -->
+    <section class="reviews-card">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <div>
+          <h2 style="font-size:1.4rem; font-weight:700; color:var(--text);">Customer Reviews &amp; Ratings</h2>
+          <p style="color:var(--muted); font-size:0.9rem;">Genuine feedback from verified QuickServe customers</p>
+        </div>
+        <button type="button" class="btn-ghost small" id="writeReviewBtn">✍️ Write a Review</button>
+      </div>
+
+      <div id="reviewsList">
+        <div class="review-item">
+          <div class="review-user">Rohan M. <span>✔ Verified Buyer</span></div>
+          <div class="stars">★★★★★</div>
+          <p style="color:var(--text); margin-top:4px;">Excellent quality! Delivery was super fast, arrived safely bubble-wrapped in 2 days. Exactly as described.</p>
+        </div>
+        <div class="review-item">
+          <div class="review-user">Priya S. <span>✔ Verified Buyer</span></div>
+          <div class="stars">★★★★★</div>
+          <p style="color:var(--text); margin-top:4px;">Great value for money. Built well and totally authentic. Customer service and order tracking was very helpful!</p>
+        </div>
+        <div class="review-item">
+          <div class="review-user">Amit K. <span>✔ Verified Buyer</span></div>
+          <div class="stars">★★★★☆</div>
+          <p style="color:var(--text); margin-top:4px;">Very happy with the purchase. Works smoothly and looks premium. Highly recommend QuickServe!</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="f-grid">
+        <div><h5>About</h5><a>Contact Us</a><a>About Us</a><a>Careers</a><a>Press</a></div>
+        <div><h5>Help</h5><a>Payments</a><a>Shipping</a><a>Cancellation &amp; Returns</a><a>FAQ</a></div>
+        <div><h5>Policy</h5><a>Return Policy</a><a>Terms of Use</a><a>Security</a><a>Privacy</a></div>
+        <div><h5>Registered Office</h5><p>QuickServe Retail Pvt. Ltd.<br>College Road, Sector 12<br>India - 110001<br>support@quickserve.example</p></div>
+      </div>
+      <div class="f-pay">💳 Visa &nbsp;·&nbsp; Mastercard &nbsp;·&nbsp; RuPay &nbsp;·&nbsp; UPI &nbsp;·&nbsp; Net Banking &nbsp;·&nbsp; Cash on Delivery</div>
+      <div class="f-copy">© 2026 QuickServe – Production-Ready E-commerce. Built with Node.js, Express &amp; Vanilla JS.</div>
+    </footer>
+  </div>
+
+  <!-- Drawers & Modals -->
+  <div class="overlay" id="overlay"></div>
+
+  <aside class="drawer" id="cartDrawer">
+    <div class="drawer-head"><h3>Your Cart</h3><button class="close" data-close>✕</button></div>
+    <div class="drawer-body" id="cartItems"></div>
+    <div class="drawer-foot">
+      <div class="row"><span>Subtotal</span><span id="cartSubtotal">₹0</span></div>
+      <div class="row"><span>Delivery</span><span id="cartDelivery">₹0</span></div>
+      <div class="row total"><span>Total</span><span id="cartTotal">₹0</span></div>
+      <button class="btn-grad full" id="checkoutBtn">Proceed to Checkout</button>
+    </div>
+  </aside>
+
+  <aside class="drawer" id="wishDrawer">
+    <div class="drawer-head"><h3>Wishlist</h3><button class="close" data-close>✕</button></div>
+    <div class="drawer-body" id="wishItems"></div>
+  </aside>
+
+  <div class="modal" id="checkoutModal">
+    <div class="modal-box glass">
+      <div class="modal-head">
+        <h3>QuickServe Secure Checkout</h3>
+        <button class="close" id="closeCheckout">✕</button>
+      </div>
+      <form id="checkoutForm" class="checkout-form">
+        <div class="form-grid">
+          <label><span>Full Name *</span><input type="text" id="custName" placeholder="e.g. Rahul Sharma" required></label>
+          <label><span>Email Address *</span><input type="email" id="custEmail" placeholder="rahul@example.com" required></label>
+          <label><span>Phone Number *</span><input type="tel" id="custPhone" placeholder="+91 98765 43210" required></label>
+          <label><span>Payment Method *</span>
+            <select id="custPayment">
+              <option value="cod">Cash on Delivery (COD)</option>
+              <option value="upi">UPI / QR Code</option>
+              <option value="card">Credit / Debit Card</option>
+              <option value="netbanking">Net Banking</option>
+            </select>
+          </label>
+          <label class="full"><span>Complete Shipping Address *</span><textarea id="custAddress" rows="3" placeholder="Address..." required></textarea></label>
+        </div>
+        <div class="checkout-summary">
+          <div class="summary-line"><span>Total Items (<span id="chkCount">0</span>)</span><span id="chkSubtotal">₹0</span></div>
+          <div class="summary-line"><span>Delivery Fee</span><span id="chkDelivery">FREE</span></div>
+          <div class="summary-line total"><span>Total Payable</span><span id="chkTotal">₹0</span></div>
+        </div>
+        <button type="submit" class="btn-grad full big" id="placeOrderBtn">Confirm &amp; Place Order 🔒</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal" id="orderSuccessModal">
+    <div class="modal-box glass text-center">
+      <div class="success-icon">🎉</div>
+      <h3 id="succTitle">Order Confirmed!</h3>
+      <p class="succ-sub">Thank you for shopping with QuickServe. Your order is placed.</p>
+      <div class="order-receipt glass" id="orderReceipt"></div>
+      <button class="btn-grad" id="succDoneBtn">Continue Shopping</button>
+    </div>
+  </div>
+
+  <div class="modal" id="trackOrderModal">
+    <div class="modal-box glass">
+      <div class="modal-head"><h3>Track Your Order 📦</h3><button class="close" id="closeTrack">✕</button></div>
+      <div class="track-form">
+        <p style="color:var(--muted); font-size:0.88rem; margin-bottom:12px;">Enter your Order ID (e.g. <b>QS-20261027-3625</b>):</p>
+        <div class="track-input-group">
+          <input type="text" id="trackOrderIdInput" placeholder="Enter Order ID">
+          <button type="button" class="btn-grad" id="btnLookupOrder">Track</button>
+        </div>
+      </div>
+      <div class="track-timeline" id="trackTimeline" style="display:none;"></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="js/api.js?v=20261028"></script>
+  <script src="js/data.js?v=20261028"></script>
+  <script src="js/store.js?v=20261028"></script>
+  <script src="js/app.js?v=20261028"></script>
+
+  <!-- PDP Controller -->
+  <script>
+    (function initPDP() {
+      const params = new URLSearchParams(window.location.search);
+      const prodId = Number(params.get("id")) || 1;
+      let qty = 1;
+
+      function renderPDP(p) {
+        if (!p) return;
+        document.title = `${p.name} - QuickServe`;
+        const el = (id) => document.getElementById(id);
+        const rupee = (n) => "₹" + Number(n).toLocaleString("en-IN");
+        const offPct = Math.round((1 - p.price / p.mrp) * 100);
+
+        el("bcCategory").textContent = p.category;
+        el("bcCategory").href = `index.html#category=${encodeURIComponent(p.category)}`;
+        el("bcProduct").textContent = p.brand + " " + p.name.split(" ")[0];
+
+        const img = el("pdpMainImg");
+        img.src = p.hd || p.cut || p.image;
+        img.alt = p.name;
+        img.onerror = function() { if (this.src !== p.image) this.src = p.image; };
+
+        el("pdpOffBadge").textContent = `${offPct}% OFF`;
+        el("pdpBrand").textContent = p.brand;
+        el("pdpTitle").textContent = p.name;
+        el("pdpRating").textContent = `${p.rating} ★`;
+        el("pdpReviewsCount").textContent = `(${p.reviews.toLocaleString("en-IN")} Verified Reviews)`;
+        el("pdpPrice").textContent = rupee(p.price);
+        el("pdpMrp").textContent = rupee(p.mrp);
+        el("pdpDiscountPct").textContent = `${offPct}% off`;
+
+        const wishBtn = el("pdpWishBtn");
+        wishBtn.textContent = Store.inWish(p.id) ? "♥" : "♡";
+        wishBtn.classList.toggle("on", Store.inWish(p.id));
+
+        // Specs table
+        const specs = p.specs || [];
+        el("pdpSpecsTable").innerHTML = `
+          <tr><td>Brand</td><td><b>${p.brand}</b></td></tr>
+          <tr><td>Category</td><td><b>${p.category}</b></td></tr>
+          ${specs.map((s, idx) => `<tr><td>Feature ${idx + 1}</td><td>${s}</td></tr>`).join("")}
+          <tr><td>Warranty</td><td>1 Year Brand Domestic Warranty</td></tr>
+          <tr><td>In The Box</td><td>Main Product, Warranty Card, Quick Start Guide</td></tr>
+        `;
+
+        // Quantity controls
+        el("pdpQtyMinus").onclick = () => { if (qty > 1) { qty--; el("pdpQty").textContent = qty; } };
+        el("pdpQtyPlus").onclick = () => { if (qty < 10) { qty++; el("pdpQty").textContent = qty; } };
+
+        // Add to Cart
+        el("pdpAddCartBtn").onclick = () => {
+          for (let i = 0; i < qty; i++) Store.addToCart(p.id);
+          refreshAll();
+          openDrawer("cartDrawer");
+          toast(`Added ${qty} item(s) to cart ✓`);
+        };
+
+        // Buy Now
+        el("pdpBuyNowBtn").onclick = () => {
+          Store.addToCart(p.id);
+          refreshAll();
+          openCheckoutModal();
+        };
+
+        // Wishlist
+        wishBtn.onclick = () => {
+          const added = Store.toggleWish(p.id);
+          wishBtn.textContent = added ? "♥" : "♡";
+          wishBtn.classList.toggle("on", added);
+          refreshAll();
+          toast(added ? "Added to wishlist ♥" : "Removed from wishlist");
+        };
+
+        // Write Review button
+        el("writeReviewBtn").onclick = () => {
+          const review = prompt("Write your review for " + p.name + ":");
+          if (review && review.trim()) {
+            const list = el("reviewsList");
+            const newRev = document.createElement("div");
+            newRev.className = "review-item";
+            newRev.innerHTML = `
+              <div class="review-user">You <span>✔ Verified Buyer</span></div>
+              <div class="stars">★★★★★</div>
+              <p style="color:var(--text); margin-top:4px;">${review.trim()}</p>
+            `;
+            list.prepend(newRev);
+            toast("Thank you! Review published ✓");
+          }
+        };
+      }
+
+      // Initial render from local data
+      const prod = PRODUCTS.find(p => p.id == prodId) || PRODUCTS[0];
+      renderPDP(prod);
+
+      // Refresh if backend API has live updates
+      API.fetchProducts().then(list => {
+        if (list && list.length) {
+          const live = list.find(p => p.id == prodId);
+          if (live) renderPDP(live);
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

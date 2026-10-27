@@ -1,0 +1,22 @@
+# Dependencies
+node_modules/
+backend/node_modules/
+
+# Environment files
+.env
+backend/.env
+
+# Local SQLite databases (schema in database/schema.sql, auto-seeded on npm start)
+database/*.db
+database/*.sqlite
+database/*.db-journal
+database/*.db-wal
+database/*.db-shm
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS metadata
+.DS_Store
+Thumbs.db
