@@ -35,7 +35,7 @@
     photo.src = p.hd || p.cut; photo.alt = p.name;
     if (spin3d) {                                   // swap the flat cutout for the spinnable 3D body once it is ready
       const mine = ++heroToken;
-      HeroSpin.show(p.hd || p.cut, { ...b, glb: `assets/models/p${p.id}.glb` }).then(ok => { if (mine === heroToken) { photo.hidden = ok; el("hCanvas").hidden = !ok; } });
+      HeroSpin.show(p.hd || p.cut, { ...b, glb: p.model }).then(ok => { if (mine === heroToken) { photo.hidden = ok; el("hCanvas").hidden = !ok; } });
     }
     // the next three products float around the main one, like the icons in the reference
     [1, 2, 3].forEach((k, n) => { const s = el("sat" + (n + 1)), q = byId(BANNERS[(i + k) % BANNERS.length].productId); s.src = q.cut; s.alt = q.name; });

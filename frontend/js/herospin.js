@@ -6,7 +6,7 @@ const HeroSpin = (() => {
   if (!window.THREE) return { init: () => false, show: async () => false };
   const T = THREE;
 
-  let renderer, scene, camera, holder, current, canvas, running = false, last = 0, token = 0;
+  let renderer, scene, camera, holder, current, canvas, running = false, last = 0, token = 0, contextLost = false;
   const st = { base: 0, v: 0, drag: false, x0: 0, moved: 0, spin: 0, enter: 1 };
   const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const cache = new Map();                                   // url -> Promise<{img, w, h}>
@@ -25,7 +25,7 @@ const HeroSpin = (() => {
   function resize() {
     const r = canvas.getBoundingClientRect();                       // the canvas' own displayed size
     if (!r.width || !r.height) return;
-    renderer.setPixelRatio(Math.min(Math.max(devicePixelRatio || 1, 2), 3));   // always at least 2x so edges stay crisp
+    renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
     renderer.setSize(r.width, r.height, false);
     camera.aspect = r.width / r.height; camera.updateProjectionMatrix();
   }
@@ -41,6 +41,8 @@ const HeroSpin = (() => {
     const key = new T.DirectionalLight("#ffffff", .9); key.position.set(3, 4, 6); scene.add(key);
     holder = new T.Group(); scene.add(holder);
     new ResizeObserver(resize).observe(canvas); resize();
+    canvas.addEventListener("webglcontextlost", (e) => { e.preventDefault(); contextLost = true; running = false; });
+    canvas.addEventListener("webglcontextrestored", () => { contextLost = false; resize(); start(); });
 
     canvas.addEventListener("pointerdown", (e) => { st.drag = true; st.x0 = e.clientX; st.moved = 0; st.v = 0; st.spin = 0; canvas.setPointerCapture(e.pointerId); canvas.classList.add("grab"); });
     canvas.addEventListener("pointermove", (e) => {
@@ -56,10 +58,10 @@ const HeroSpin = (() => {
     return true;
   }
 
-  function start() { if (!running && renderer) { running = true; last = performance.now(); requestAnimationFrame(loop); } }
+  function start() { if (!running && renderer && !contextLost && !document.hidden) { running = true; last = performance.now(); requestAnimationFrame(loop); } }
 
   function loop(now) {
-    if (!running) return;
+    if (!running || contextLost || document.hidden) { running = false; return; }
     const dt = Math.min(.05, Math.max(0, (now - last) / 1000)); last = now;   // browsers pause rAF in hidden tabs by themselves
     if (!st.drag) {
       if (st.spin > 0) {                                      // ease-out full turn after a tap
@@ -73,6 +75,19 @@ const HeroSpin = (() => {
     if (st.enter < 1) { st.enter = Math.min(1, st.enter + dt / .6); const e = 1 - Math.pow(1 - st.enter, 3); holder.scale.setScalar(.5 + .5 * e); }
     try { renderer.render(scene, camera); } catch (err) { console.error("HeroSpin render failed", err); running = false; return; }
     requestAnimationFrame(loop);
+  }
+
+  function dispose(object) {
+    if (!object) return;
+    object.traverse(o => {
+      if (o.geometry) o.geometry.dispose();
+      if (!o.material) return;
+      const materials = Array.isArray(o.material) ? o.material : [o.material];
+      materials.forEach(m => {
+        if (m.map) m.map.dispose();
+        m.dispose();
+      });
+    });
   }
 
   function loadImage(url) {
@@ -136,7 +151,6 @@ const HeroSpin = (() => {
   async function loadGlb(url) {
     if (!T.GLTFLoader) return null;
     if (!glbCache.has(url)) glbCache.set(url, (async () => {
-      try { const head = await fetch(url, { method: "HEAD" }); if (!head.ok) return null; } catch { return null; }
       return new Promise(ok => new T.GLTFLoader().load(url, g => ok(g.scene), undefined, () => ok(null)));
     })());
     return glbCache.get(url);
@@ -152,8 +166,9 @@ const HeroSpin = (() => {
       const model = real.clone(true), box = new T.Box3().setFromObject(model), c = box.getCenter(new T.Vector3()), z = box.getSize(new T.Vector3());
       model.position.sub(c);
       const wrap = new T.Group(); wrap.add(model);
-      wrap.scale.setScalar(Math.min(6.0 / Math.hypot(z.x, z.z), 4.4 / z.y));
-      if (current) holder.remove(current);
+      const largest = Math.max(z.x, z.y, z.z, 0.001);
+      wrap.scale.setScalar(4.4 / largest);
+      if (current) { holder.remove(current); dispose(current); }
       holder.add(wrap); current = wrap; st.base = -.35; st.v = 0; st.spin = 0; st.enter = 0; start();
       return true;
     }
@@ -161,18 +176,21 @@ const HeroSpin = (() => {
     if (mine !== token) return true;
     try {
       const { g, W, H } = buildBody(img, opts.depth ?? .15);
-      const tex = new T.Texture(img); tex.needsUpdate = true; tex.encoding = T.sRGBEncoding; tex.anisotropy = renderer.capabilities.getMaxAnisotropy(); tex.minFilter = T.LinearMipmapLinearFilter; tex.magFilter = T.LinearFilter;
+      const tex = new T.Texture(img); tex.needsUpdate = true;
+      if ("colorSpace" in tex && T.SRGBColorSpace) tex.colorSpace = T.SRGBColorSpace; else tex.encoding = T.sRGBEncoding;
+      tex.anisotropy = Math.min(renderer.capabilities.getMaxAnisotropy(), 4); tex.minFilter = T.LinearMipmapLinearFilter; tex.magFilter = T.LinearFilter;
       const mat = new T.MeshStandardMaterial({ map: tex, alphaTest: .02, alphaToCoverage: true, roughness: .7, metalness: 0, side: T.DoubleSide,
         emissive: new T.Color("#ffffff"), emissiveMap: tex, emissiveIntensity: .2 });   // keeps the photo's own look
       const mesh = new T.Mesh(g, mat);
       const wrap = new T.Group(); wrap.add(mesh);
       wrap.scale.setScalar(Math.min(6.2 / W, 4.6 / H));                   // fill the stage without clipping
-      if (current) { holder.remove(current); current.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material) { o.material.map && o.material.map.dispose(); o.material.dispose(); } }); }
+      if (current) { holder.remove(current); dispose(current); }
       holder.add(wrap); current = wrap;
       st.base = -.35; st.v = 0; st.spin = 0; st.enter = 0; start();
       return true;
     } catch (err) { console.error("HeroSpin: could not build 3D body", err); return false; }
   }
 
+  document.addEventListener("visibilitychange", () => { if (document.hidden) running = false; else start(); });
   return { init, show, debug: () => ({ running, base: +st.base.toFixed(3), v: +st.v.toFixed(4), drag: st.drag, spin: st.spin, enter: st.enter }) };
 })();
