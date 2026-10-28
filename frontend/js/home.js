@@ -5,7 +5,7 @@
   let i = Math.max(0, Math.min(BANNERS.length - 1, +new URLSearchParams(location.search).get("slide") || 0)), timer; // ?slide=N opens that ad
 
   /* Hero ad: everything comes from the linked product + the slide colours */
-  const spin3d = HeroSpin.init(el("hCanvas"));
+  const spin3d = false;   // flat, sharp product photo: the inflated 3D body made products look fat
   let heroToken = 0;
 
   function renderHero() {

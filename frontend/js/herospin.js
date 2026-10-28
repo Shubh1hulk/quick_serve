@@ -1,6 +1,6 @@
 // Hero 3D spinner: turns a transparent product cutout into a photo-textured 3D body
 // (the silhouette is inflated into a rounded volume, front and back carry the real photo)
-// and lets the user spin it 360 degrees by touching / dragging / tapping it.
+// shown front-facing and static (the 360 spin interaction is disabled).
 // Usage: HeroSpin.init(canvas) -> true/false;  await HeroSpin.show("assets/products/c1.png") -> true/false
 const HeroSpin = (() => {
   if (!window.THREE) return { init: () => false, show: async () => false };
@@ -44,17 +44,6 @@ const HeroSpin = (() => {
     canvas.addEventListener("webglcontextlost", (e) => { e.preventDefault(); contextLost = true; running = false; });
     canvas.addEventListener("webglcontextrestored", () => { contextLost = false; resize(); start(); });
 
-    canvas.addEventListener("pointerdown", (e) => { st.drag = true; st.x0 = e.clientX; st.moved = 0; st.v = 0; st.spin = 0; canvas.setPointerCapture(e.pointerId); canvas.classList.add("grab"); });
-    canvas.addEventListener("pointermove", (e) => {
-      if (!st.drag) return;
-      const dx = e.clientX - st.x0; st.x0 = e.clientX; st.moved += Math.abs(dx);
-      st.base += dx * .014; st.v = dx * .014;
-    });
-    const up = () => {
-      if (!st.drag) return; st.drag = false; canvas.classList.remove("grab");
-      if (st.moved < 5) st.spin = Math.PI * 2;               // a plain tap = one full turn
-    };
-    canvas.addEventListener("pointerup", up); canvas.addEventListener("pointercancel", up);
     return true;
   }
 
@@ -63,14 +52,7 @@ const HeroSpin = (() => {
   function loop(now) {
     if (!running || contextLost || document.hidden) { running = false; return; }
     const dt = Math.min(.05, Math.max(0, (now - last) / 1000)); last = now;   // browsers pause rAF in hidden tabs by themselves
-    if (!st.drag) {
-      if (st.spin > 0) {                                      // ease-out full turn after a tap
-        const step = Math.max(st.spin * 6 * dt, .02); st.base += Math.min(step, st.spin); st.spin = Math.max(0, st.spin - step);
-      }
-      st.base += st.v; st.v *= .95;                           // inertia after a drag
-    }
-    const idle = reduceMotion || st.drag || st.spin > 0 || Math.abs(st.v) > .002 ? 0 : Math.sin(now / 1400) * .22;
-    holder.rotation.y = st.base + idle;
+    holder.rotation.y = st.base;                              // fixed, front-facing: no 360 spin or sway so the product stays clearly visible
     holder.position.y = Math.sin(now / 900) * .07;
     if (st.enter < 1) { st.enter = Math.min(1, st.enter + dt / .6); const e = 1 - Math.pow(1 - st.enter, 3); holder.scale.setScalar(.5 + .5 * e); }
     try { renderer.render(scene, camera); } catch (err) { console.error("HeroSpin render failed", err); running = false; return; }
@@ -169,7 +151,7 @@ const HeroSpin = (() => {
       const largest = Math.max(z.x, z.y, z.z, 0.001);
       wrap.scale.setScalar(4.4 / largest);
       if (current) { holder.remove(current); dispose(current); }
-      holder.add(wrap); current = wrap; st.base = -.35; st.v = 0; st.spin = 0; st.enter = 0; start();
+      holder.add(wrap); current = wrap; st.base = 0; st.v = 0; st.spin = 0; st.enter = 0; start();
       return true;
     }
     let img; try { img = await loadImage(url); } catch { return false; }
@@ -183,10 +165,10 @@ const HeroSpin = (() => {
         emissive: new T.Color("#ffffff"), emissiveMap: tex, emissiveIntensity: .2 });   // keeps the photo's own look
       const mesh = new T.Mesh(g, mat);
       const wrap = new T.Group(); wrap.add(mesh);
-      wrap.scale.setScalar(Math.min(6.2 / W, 4.6 / H));                   // fill the stage without clipping
+      wrap.scale.setScalar(Math.min(7.4 / W, 5.1 / H));                   // fill the stage without clipping
       if (current) { holder.remove(current); dispose(current); }
       holder.add(wrap); current = wrap;
-      st.base = -.35; st.v = 0; st.spin = 0; st.enter = 0; start();
+      st.base = 0; st.v = 0; st.spin = 0; st.enter = 0; start();
       return true;
     } catch (err) { console.error("HeroSpin: could not build 3D body", err); return false; }
   }
