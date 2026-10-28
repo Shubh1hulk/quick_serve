@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QuickServe Guest Dashboard</title>
+  <link rel="stylesheet" href="css/style.css?v=20261028r">
+  <style>
+    .dashboard-shell { width:min(1120px,100%); margin:auto; padding:28px 16px 70px; }
+    .dashboard-head { display:flex; justify-content:space-between; align-items:center; gap:16px; margin-bottom:22px; }
+    .dashboard-head h1 { margin:5px 0 0; }
+    .dashboard-panel { padding:20px; margin-bottom:18px; }
+    .guest-form { display:grid; grid-template-columns:1fr auto; gap:10px; }
+    .guest-form input { padding:12px; border:1px solid var(--border); border-radius:8px; background:var(--glass); color:var(--text); }
+    .guest-result { margin-top:16px; }
+    .guest-note { color:var(--muted); font-size:.88rem; }
+    @media(max-width:620px){.dashboard-head{align-items:flex-start;flex-direction:column}.guest-form{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <main class="dashboard-shell">
+    <header class="dashboard-head"><div><a href="index.html" class="logo">QUICKSERVE</a><h1>Guest dashboard</h1></div><a class="btn-grad" href="auth.html">Create account</a></header>
+    <section class="dashboard-panel glass"><h2>Track an order</h2><p class="guest-note">Use your QuickServe order ID. You do not need an account.</p><form class="guest-form" id="guestTrackForm"><input id="guestOrderId" placeholder="QS-20261029-1234" required><button class="btn-grad" type="submit">Track order</button></form><div class="guest-result" id="guestResult"></div></section>
+    <section class="dashboard-panel glass"><h2>Why create an account?</h2><p class="guest-note">Save your order history, manage your profile, cancel eligible orders, and track everything from one place.</p><a class="btn-ghost" href="auth.html">Sign in or register</a></section>
+  </main>
+  <script src="js/guest.js"></script>
+</body>
+</html>

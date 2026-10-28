@@ -1,0 +1,10 @@
+{
+  "name": "quickserve",
+  "private": true,
+  "scripts": {
+    "start": "npm --prefix backend start",
+    "dev": "npm --prefix backend run dev",
+    "install:all": "npm --prefix backend install",
+    "test": "node --test tests/api.test.js"
+  }
+}

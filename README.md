@@ -38,11 +38,39 @@ e-commerce/
 ### Option A: Fullstack Mode (Recommended)
 Runs both the backend API and frontend together on port 5000:
 ```bash
-cd backend
-npm install
+npm run install:all
 npm start
 ```
 Open **http://localhost:5000/** in your browser.
+
+### New account and operations features
+- `/auth.html` provides customer registration and login.
+- `/admin.html` provides protected order metrics and status management for an admin account configured through `backend/.env`.
+- Non-COD checkout creates and confirms a payment intent through the configured payment provider abstraction. The default local provider is `mock`; connect a real provider before production use.
+- Order tracking reads persisted status events from the API.
+- Admins can publish courier latitude, longitude, speed, and ETA from `/admin.html`; customers see the latest location in the Track Order panel, which refreshes every 15 seconds.
+- For automatic GPS updates, connect a courier/device provider to `PATCH /api/admin/orders/:id/location` or replace that admin endpoint with a signed courier webhook.
+
+Run the automated API checks with:
+```bash
+npm test
+```
+
+Build and run the container with:
+```bash
+docker build -t quickserve .
+docker run --rm -p 5000:5000 --env-file backend/.env quickserve
+```
+
+### Render + Neon setup
+1. Create a Neon PostgreSQL database and copy its connection string.
+2. Create a Render Web Service from this repository. Render can use the included `render.yaml` Blueprint.
+3. Add the Neon connection string as `DATABASE_URL` in Render. Keep `DB_SSL=true`.
+4. Add an admin email and a strong admin password in Render. Do not commit these values.
+5. Leave `RAZORPAY_KEY_ID` and `RAZORPAY_KEY_SECRET` empty until Razorpay is ready. The app will use mock payments until both are present.
+6. When Razorpay is enabled, set both keys in Render and use the Razorpay test keys first.
+
+The only values needed from you later are the Neon connection string, admin account values, and Razorpay keys. They belong in Render environment variables or a local ignored `backend/.env`, never in source files.
 
 ### Option B: Standalone Frontend + Backend
 1. **Start backend API**:

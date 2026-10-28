@@ -131,10 +131,80 @@ async function initDb() {
     );
   `;
 
+  const createUsersTable = `
+    CREATE TABLE IF NOT EXISTS users (
+      id INTEGER PRIMARY KEY,
+      name VARCHAR(120) NOT NULL,
+      email VARCHAR(120) NOT NULL UNIQUE,
+      password_hash VARCHAR(255) NOT NULL,
+      role VARCHAR(20) NOT NULL DEFAULT 'customer',
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+  `;
+
+  const createSessionsTable = `
+    CREATE TABLE IF NOT EXISTS sessions (
+      token_hash VARCHAR(128) PRIMARY KEY,
+      user_id INTEGER NOT NULL,
+      expires_at TIMESTAMP NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+  `;
+
+  const createOrderEventsTable = `
+    CREATE TABLE IF NOT EXISTS order_events (
+      id INTEGER PRIMARY KEY,
+      order_id VARCHAR(64) NOT NULL,
+      status VARCHAR(40) NOT NULL,
+      note TEXT,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+  `;
+
+  const createPaymentsTable = `
+    CREATE TABLE IF NOT EXISTS payments (
+      id VARCHAR(64) PRIMARY KEY,
+      order_id VARCHAR(64),
+      amount NUMERIC(10, 2) NOT NULL,
+      method VARCHAR(40) NOT NULL,
+      status VARCHAR(40) NOT NULL DEFAULT 'created',
+      provider VARCHAR(40) NOT NULL DEFAULT 'mock',
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+  `;
+
+  const createDeliveryLocationsTable = `
+    CREATE TABLE IF NOT EXISTS delivery_locations (
+      order_id VARCHAR(64) PRIMARY KEY,
+      latitude NUMERIC(10, 7) NOT NULL,
+      longitude NUMERIC(10, 7) NOT NULL,
+      accuracy_m NUMERIC(8, 2),
+      speed_kmh NUMERIC(8, 2),
+      heading NUMERIC(6, 2),
+      eta_minutes INTEGER,
+      provider VARCHAR(40) DEFAULT 'manual',
+      recorded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+  `;
+
   await run(createCategoriesTable);
   await run(createProductsTable);
   await run(createBannersTable);
   await run(createOrdersTable);
+  await run(createUsersTable);
+  await run(createSessionsTable);
+  await run(createOrderEventsTable);
+  await run(createPaymentsTable);
+  await run(createDeliveryLocationsTable);
+
+  if (isPostgres) {
+    await run("ALTER TABLE orders ADD COLUMN IF NOT EXISTS user_id INTEGER");
+  } else {
+    const orderColumns = await query("PRAGMA table_info(orders)");
+    if (!orderColumns.some(column => column.name === "user_id")) {
+      await run("ALTER TABLE orders ADD COLUMN user_id INTEGER");
+    }
+  }
 
   // Check if products need seeding
   const existingProduct = await get("SELECT id FROM products LIMIT 1");

@@ -89,13 +89,35 @@ const API = (() => {
   async function createOrder(orderPayload) {
     const res = await fetch(`${BASE_URL}/orders`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...(localStorage.getItem("quickserveToken") ? { Authorization: `Bearer ${localStorage.getItem("quickserveToken")}` } : {}) },
       body: JSON.stringify(orderPayload)
     });
     const json = await res.json();
     if (!res.ok || !json.success) {
       throw new Error(json.message || "Failed to place order");
     }
+    return json.data;
+  }
+
+  async function createPaymentIntent(amount, method) {
+    const res = await fetch(`${BASE_URL}/payments/intent`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ amount, method })
+    });
+    const json = await res.json();
+    if (!res.ok || !json.success) throw new Error(json.message || "Unable to create payment");
+    return json.data;
+  }
+
+  async function confirmPayment(paymentId, details = {}) {
+    const res = await fetch(`${BASE_URL}/payments/${encodeURIComponent(paymentId)}/confirm`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(details)
+    });
+    const json = await res.json();
+    if (!res.ok || !json.success) throw new Error(json.message || "Unable to confirm payment");
     return json.data;
   }
 
@@ -111,6 +133,8 @@ const API = (() => {
     fetchBanners,
     fetchFeatured,
     fetchCategories,
-    createOrder
+    createOrder,
+    createPaymentIntent,
+    confirmPayment
   };
 })();

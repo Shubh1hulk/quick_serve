@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QuickServe Account</title>
+  <link rel="stylesheet" href="css/style.css?v=20261028r">
+  <style>
+    .dashboard-shell{width:min(1120px,100%);margin:auto;padding:28px 16px 70px}.dashboard-head{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:22px}.dashboard-head h1{margin:5px 0 0}.dashboard-grid{display:grid;grid-template-columns:280px 1fr;gap:18px}.dashboard-panel{padding:20px;margin-bottom:18px}.profile-form{display:grid;gap:10px}.profile-form input{padding:11px;border:1px solid var(--border);border-radius:8px;background:var(--glass);color:var(--text)}.order-list{display:grid;gap:10px}.order-row{display:grid;grid-template-columns:1.4fr .8fr .9fr auto;align-items:center;gap:12px;padding:14px;border:1px solid var(--border);border-radius:9px}.order-row small{color:var(--muted)}.user-message{min-height:20px;color:var(--muted);font-size:.84rem}@media(max-width:760px){.dashboard-head{align-items:flex-start;flex-direction:column}.dashboard-grid{grid-template-columns:1fr}.order-row{grid-template-columns:1fr 1fr}.order-row button{grid-column:1/-1}}
+  </style>
+</head>
+<body>
+  <main class="dashboard-shell">
+    <header class="dashboard-head"><div><a href="index.html" class="logo">QUICKSERVE</a><h1>Your dashboard</h1></div><div><a class="btn-ghost" href="index.html">Shop</a> <button class="btn-grad" id="logout">Sign out</button></div></header>
+    <div class="dashboard-grid"><aside><section class="dashboard-panel glass"><h2>Profile</h2><form class="profile-form" id="profileForm"><input id="profileName" required><input id="profileEmail" disabled><button class="btn-grad" type="submit">Save name</button></form><div class="user-message" id="profileMessage"></div></section><section class="dashboard-panel glass"><a class="btn-ghost" href="guest.html">Guest tracking</a></section></aside><section><section class="dashboard-panel glass"><h2>My orders</h2><div class="order-list" id="orderList">Loading orders...</div></section><section class="dashboard-panel glass" id="orderDetail" hidden></section></section></div>
+  </main>
+  <script src="js/user.js"></script>
+</body>
+</html>

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QuickServe Admin</title>
+  <link rel="stylesheet" href="css/style.css?v=20261028r">
+  <style>
+    .admin-shell { width: min(1180px, 100%); margin: 0 auto; padding: 28px 16px 70px; }
+    .admin-head { display:flex; justify-content:space-between; align-items:center; gap:16px; margin-bottom:24px; }
+    .admin-head h1 { margin:0; }
+    .metric-grid { display:grid; grid-template-columns:repeat(4, 1fr); gap:14px; margin-bottom:24px; }
+    .metric, .admin-panel { padding:18px; }
+    .metric b { display:block; font-size:1.7rem; margin-top:8px; }
+    .admin-panel { overflow:auto; }
+    .location-form { display:grid; grid-template-columns: 1.4fr repeat(3, 1fr) auto; gap:10px; align-items:end; margin-bottom:22px; }
+    .location-form label { display:grid; gap:5px; font-size:.8rem; color:var(--muted); }
+    .location-form input { width:100%; padding:9px; border-radius:7px; border:1px solid var(--border); background:var(--glass); color:var(--text); }
+    .location-message { min-height:20px; color:var(--muted); font-size:.82rem; margin-top:8px; }
+    table { width:100%; border-collapse:collapse; }
+    th, td { padding:12px 10px; text-align:left; border-bottom:1px solid var(--border); white-space:nowrap; }
+    select { padding:8px; border-radius:7px; background:var(--glass); color:var(--text); border:1px solid var(--border); }
+    @media (max-width: 760px) { .metric-grid { grid-template-columns:repeat(2, 1fr); } .admin-head { align-items:flex-start; flex-direction:column; } .location-form { grid-template-columns:1fr 1fr; } }
+  </style>
+</head>
+<body>
+  <main class="admin-shell">
+    <header class="admin-head"><div><a href="index.html" class="logo">QUICKSERVE</a><h1>Operations dashboard</h1></div><button class="btn-ghost" id="logout">Sign out</button></header>
+    <div class="metric-grid" id="metrics"></div>
+    <section class="admin-panel glass"><h2>Update courier location</h2><form class="location-form" id="locationForm"><label>Order ID<input id="locationOrderId" placeholder="QS-..." required></label><label>Latitude<input id="locationLatitude" type="number" step="any" placeholder="28.6139" required></label><label>Longitude<input id="locationLongitude" type="number" step="any" placeholder="77.2090" required></label><label>ETA minutes<input id="locationEta" type="number" min="0" placeholder="18"></label><button class="btn-grad" type="submit">Publish</button></form><div class="location-message" id="locationMessage"></div></section>
+    <section class="admin-panel glass"><h2>Recent orders</h2><table><thead><tr><th>Order</th><th>Customer</th><th>Total</th><th>Payment</th><th>Status</th></tr></thead><tbody id="orders"><tr><td colspan="5">Loading...</td></tr></tbody></table></section>
+    <section class="admin-panel glass"><h2>Inventory</h2><table><thead><tr><th>Product</th><th>Category</th><th>Price</th><th>Stock</th><th>Action</th></tr></thead><tbody id="products"><tr><td colspan="5">Loading...</td></tr></tbody></table><div class="location-message" id="inventoryMessage"></div></section>
+  </main>
+  <script src="js/admin.js"></script>
+</body>
+</html>

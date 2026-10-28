@@ -3,6 +3,48 @@ const rupee = (n) => "₹" + n.toLocaleString("en-IN");
 const FREE_DELIVERY_ABOVE = 499;
 const DELIVERY_FEE = 40;
 
+function loadRazorpay() {
+  return new Promise((resolve, reject) => {
+    if (window.Razorpay) return resolve();
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.onload = resolve;
+    script.onerror = () => reject(new Error("Unable to load payment checkout"));
+    document.head.appendChild(script);
+  });
+}
+
+async function completeOnlinePayment(payment) {
+  if (payment.provider !== "razorpay") {
+    return API.confirmPayment(payment.paymentId);
+  }
+  await loadRazorpay();
+  return new Promise((resolve, reject) => {
+    const checkout = new Razorpay({
+      key: payment.publicKey,
+      amount: Math.round(payment.amount * 100),
+      currency: payment.currency,
+      name: "QuickServe",
+      description: "QuickServe order payment",
+      order_id: payment.providerOrderId,
+      prefill: { name: $("custName").value, email: $("custEmail").value, contact: $("custPhone").value },
+      handler: async response => {
+        try {
+          resolve(await API.confirmPayment(payment.paymentId, {
+            razorpayOrderId: response.razorpay_order_id,
+            razorpayPaymentId: response.razorpay_payment_id,
+            razorpaySignature: response.razorpay_signature
+          }));
+        } catch (error) {
+          reject(error);
+        }
+      },
+      modal: { ondismiss: () => reject(new Error("Payment was cancelled")) }
+    });
+    checkout.open();
+  });
+}
+
 const state = { category: "All", query: "", sort: "featured", maxPrice: 100000, minRating: 0 };
 
 /* ---------- Helpers ---------- */
@@ -268,6 +310,10 @@ $("checkoutForm")?.addEventListener("submit", async (e) => {
   try {
     let orderResult;
     try {
+      if (payload.paymentMethod !== "cod") {
+        const payment = await API.createPaymentIntent(cartTotals().total, payload.paymentMethod);
+        await completeOnlinePayment(payment);
+      }
       orderResult = await API.createOrder(payload);
     } catch (apiErr) {
       console.warn("API order failed, using offline mode:", apiErr.message);
@@ -430,6 +476,44 @@ $("checkPinBtn")?.addEventListener("click", () => {
 });
 
 /* ================= Order Tracking Controller ================= */
+let trackingRefreshTimer = null;
+
+function renderLiveLocation(liveLocation) {
+  const panel = $("liveLocation");
+  if (!panel) return;
+  if (!liveLocation?.available || !liveLocation.location) {
+    panel.style.display = "block";
+    panel.innerHTML = `<div class="track-live-empty">Live courier location will appear after the order is dispatched.</div>`;
+    return;
+  }
+
+  const location = liveLocation.location;
+  const recordedAt = new Date(location.recordedAt);
+  const ageMinutes = Math.max(0, Math.round((Date.now() - recordedAt.getTime()) / 60000));
+  const stale = ageMinutes > 10;
+  const mapUrl = `https://www.openstreetmap.org/?mlat=${location.latitude}&mlon=${location.longitude}#map=16/${location.latitude}/${location.longitude}`;
+  panel.style.display = "block";
+  panel.innerHTML = `
+    <div class="track-live-head"><b>${stale ? "Location update delayed" : "Courier location live"}</b><span class="live-pulse"></span></div>
+    <div class="track-live-grid">
+      <div><small>Coordinates</small><strong>${location.latitude.toFixed(5)}, ${location.longitude.toFixed(5)}</strong></div>
+      <div><small>Estimated arrival</small><strong>${location.etaMinutes == null ? "Updating" : `${location.etaMinutes} min`}</strong></div>
+      <div><small>Courier speed</small><strong>${location.speedKmh == null ? "Updating" : `${location.speedKmh} km/h`}</strong></div>
+      <div><small>Last update</small><strong>${ageMinutes < 1 ? "Just now" : `${ageMinutes} min ago`}</strong></div>
+    </div>
+    <a class="btn-ghost small" href="${mapUrl}" target="_blank" rel="noopener">Open live location map ↗</a>
+  `;
+}
+
+async function refreshLiveLocation(orderId) {
+  try {
+    const res = await fetch(`${API.BASE_URL}/orders/${encodeURIComponent(orderId)}/live`);
+    if (res.ok) renderLiveLocation(await res.json().then(json => json.data));
+  } catch (error) {
+    // Keep the last known tracking state visible when a refresh briefly fails.
+  }
+}
+
 $("navTrackBtn")?.addEventListener("click", (e) => {
   e.preventDefault();
   openModal("trackOrderModal");
@@ -461,27 +545,13 @@ $("btnLookupOrder")?.addEventListener("click", async () => {
       <div>${custLine}</div>
       <div style="color:var(--muted); font-size:0.85rem; margin-top:4px;">${amtLine}</div>
     </div>
-    <div class="track-step done">
-      <b>Order Placed &amp; Confirmed</b>
-      <small>Verified by QuickServe Automated Processing</small>
-    </div>
-    <div class="track-step done">
-      <b>Quality Inspection &amp; Packaged</b>
-      <small>Package inspected and bubble wrapped at fulfillment center</small>
-    </div>
-    <div class="track-step active">
-      <b>Dispatched with Courier Partner</b>
-      <small>In transit with BlueDart Express · Tracking AWB: BD${Math.floor(100000000 + Math.random() * 900000000)}</small>
-    </div>
-    <div class="track-step">
-      <b>Out for Delivery</b>
-      <small>Expected delivery by Courier executive</small>
-    </div>
-    <div class="track-step">
-      <b>Delivered</b>
-      <small>OTP verification upon handover</small>
-    </div>
+    ${(orderData?.tracking || [{ status: "confirmed", note: "Order placed" }]).map(event => `
+      <div class="track-step done"><b>${event.status.replaceAll("_", " ").replace(/\b\w/g, char => char.toUpperCase())}</b><small>${event.note || "Order status updated"}</small></div>
+    `).join("")}
   `;
+  renderLiveLocation(orderData ? { available: Boolean(orderData.liveLocation), location: orderData.liveLocation } : null);
+  clearInterval(trackingRefreshTimer);
+  trackingRefreshTimer = setInterval(() => refreshLiveLocation(orderId), 15000);
 });
 
 /* ================= Floating Glass Dock ================= */

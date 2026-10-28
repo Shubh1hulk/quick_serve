@@ -1426,11 +1426,36 @@ body::after { display: none !important; }
 }
 .track-step b { display: block; color: var(--text); font-size: .95rem; }
 .track-step small { color: var(--muted); font-size: .8rem; }
+.live-location {
+  margin-top: 20px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--glass);
+}
+.track-live-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.track-live-head .live-pulse { position: static; display: inline-block; width: 8px; height: 8px; }
+.track-live-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.track-live-grid small, .track-live-grid strong { display: block; }
+.track-live-grid small { color: var(--muted); font-size: .75rem; margin-bottom: 3px; }
+.track-live-grid strong { font-size: .88rem; overflow-wrap: anywhere; }
+.track-live-empty { color: var(--muted); font-size: .86rem; }
 
 @media (max-width: 768px) {
   .qview-grid { grid-template-columns: 1fr; }
   .glass-dock { bottom: 12px; padding: 6px 10px; gap: 4px; }
   .live-toast { display: none; }
+  .track-live-grid { grid-template-columns: 1fr; }
 }
 
 /* ==========================================================================

@@ -8,10 +8,14 @@ const rateLimit = require("express-rate-limit");
 const path = require("path");
 
 const db = require("./db");
+const { hashPassword } = require("./auth");
 const productsRouter = require("./routes/products");
 const categoriesRouter = require("./routes/categories");
 const bannersRouter = require("./routes/banners");
 const ordersRouter = require("./routes/orders");
+const authRouter = require("./routes/auth");
+const paymentsRouter = require("./routes/payments");
+const adminRouter = require("./routes/admin");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -53,6 +57,9 @@ app.use("/api/products", productsRouter);
 app.use("/api/categories", categoriesRouter);
 app.use("/api/banners", bannersRouter);
 app.use("/api/orders", ordersRouter);
+app.use("/api/auth", authRouter);
+app.use("/api/payments", paymentsRouter);
+app.use("/api/admin", adminRouter);
 
 // 404 handler for API routes
 app.use("/api", (req, res) => {
@@ -79,6 +86,17 @@ app.use((err, req, res, next) => {
 async function startServer() {
   try {
     await db.initDb();
+    if (process.env.ADMIN_EMAIL && process.env.ADMIN_PASSWORD) {
+      const adminEmail = process.env.ADMIN_EMAIL.trim().toLowerCase();
+      const existingAdmin = await db.get("SELECT id FROM users WHERE email = ?", [adminEmail]);
+      if (!existingAdmin) {
+        await db.run(
+          "INSERT INTO users (id, name, email, password_hash, role) VALUES (?, ?, ?, ?, ?)",
+          [Date.now(), process.env.ADMIN_NAME || "QuickServe Admin", adminEmail, hashPassword(process.env.ADMIN_PASSWORD), "admin"]
+        );
+        console.log(`🔐 Admin account provisioned for ${adminEmail}`);
+      }
+    }
     const server = app.listen(PORT, () => {
       console.log(`🚀 QuickServe Backend API running at http://localhost:${PORT}`);
       console.log(`🔗 Health check available at http://localhost:${PORT}/api/health`);
